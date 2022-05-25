@@ -1,6 +1,7 @@
 package study.querydsl;
 
 import static org.assertj.core.api.Assertions.*;
+import static study.querydsl.entity.QMember.*;
 
 import javax.persistence.EntityManager;
 
@@ -13,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import study.querydsl.entity.Member;
-import study.querydsl.entity.QMember;
 import study.querydsl.entity.Team;
 
 @SpringBootTest
@@ -22,10 +22,12 @@ public class QuerydslBasicTest {
 	@Autowired
 	private EntityManager em;
 
-	JPAQueryFactory queryFactory = new JPAQueryFactory(em);
+	JPAQueryFactory queryFactory;
 
 	@BeforeEach
 	void setUp() {
+		queryFactory = new JPAQueryFactory(em);
+
 		Team teamA = new Team("teamA");
 		Team teamB = new Team("teamB");
 
@@ -57,12 +59,36 @@ public class QuerydslBasicTest {
 
 	@Test
 	public void startQuerydsl() {
-		QMember m = new QMember("m");
+		// QMember m = new QMember("m"); 여기서 "m"은 jpql의 alias이고 같은 테이블을 조인해야하는 경우가 생기면 그때 선언해서 사용
+		// QMember m = QMember.member;
+		// 위의 두개 다 사용가능하지만 static import가 가장 깔끔함
 
 		Member findMember = queryFactory
-			.select(m)
-			.from(m)
-			.where(m.username.eq("member1"))
+			.select(member)
+			.from(member)
+			.where(member.username.eq("member1"))
+			.fetchOne();
+
+		assertThat(findMember.getUsername()).isEqualTo("member1");
+	}
+
+	@Test
+	public void search() {
+		Member findMember = queryFactory.selectFrom(member)
+			.where(member.username.eq("member1")
+				.and(member.age.eq(10)))
+			.fetchOne();
+
+		assertThat(findMember.getUsername()).isEqualTo("member1");
+	}
+
+	@Test
+	public void searchAndParam() {
+		Member findMember = queryFactory.selectFrom(member)
+			.where(
+				member.username.eq("member1"),
+				member.age.eq(10)
+			)
 			.fetchOne();
 
 		assertThat(findMember.getUsername()).isEqualTo("member1");
