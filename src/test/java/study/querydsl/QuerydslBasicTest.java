@@ -93,4 +93,21 @@ public class QuerydslBasicTest {
 
 		assertThat(findMember.getUsername()).isEqualTo("member1");
 	}
+
+	@Test
+	public void resulFetch() {
+		// List<Member> fetch = queryFactory.selectFrom(member).fetch();
+
+		// Member fetchOne = queryFactory.selectFrom(member).fetchOne();
+
+		// Member fetchFirst = queryFactory.selectFrom(member).fetchFirst();
+
+		// QueryResults<Member> results = queryFactory.selectFrom(member).fetchResults();
+
+		//아래 두개는 deprecated 됨 fetch()로 대체 가능
+		// List<Member> content = results.getResults();
+
+		// long total = queryFactory.selectFrom(member).fetchCount();
+
+	}
 }
