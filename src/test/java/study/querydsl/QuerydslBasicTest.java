@@ -639,4 +639,52 @@ public class QuerydslBasicTest {
 	private BooleanExpression allEq(String usernameCond, Integer ageCond) {
 		return usernameEq(usernameCond).and(ageEq(ageCond));
 	}
+
+	@Test
+	public void bulkUpdate() {
+
+		//member1 = 10 -> 비회원
+		//member2 = 20 -> 비회원
+		//member3 = 30 -> 유지
+		//member4 = 40 -> 유지
+		long count = queryFactory
+			.update(member)
+			.set(member.username, "비회원")
+			.where(member.age.lt(28))
+			.execute();
+
+		// 벌크 연산은 영속성 컨텍스트와 데이터베이스간의 차이가 발생하게 된다.
+		// 그리고 영속성 컨텍스트가 항상 우선순위를 가지게 된다.
+		// 따라서 엔티티 매니저를 초기화 해줘야 한다.
+		// 초기화 하지 않으면 기존의 영속성 컨텍스트가 출력됨
+		em.flush();
+		em.clear();
+
+		List<Member> result = queryFactory
+			.selectFrom(member)
+			.fetch();
+
+		for (Member member1 : result) {
+			System.out.println("member1 = " + member1);
+		}
+
+	}
+
+	@Test
+	public void bulkAdd() {
+		long count = queryFactory
+			.update(member)
+			.set(member.age, member.age.add(1)) //member.age.add(-1), multiply(2)
+			.execute();
+	}
+
+	@Test
+	public void bulkDelete() {
+		long count = queryFactory
+			.delete(member)
+			.where(member.age.gt(18))
+			.execute();
+		em.flush();
+		em.clear();
+	}
 }
